@@ -89,8 +89,10 @@ module NeAPI
     include NeAPI
     SIGN_IN_PATH = "/users/sign_in/"
     NEAUTH_PATH = "/api_neauth/"
-    attr_accessor :redirect_url
-    def initialize redirect_url
+    attr_accessor :redirect_url, :ne_user
+    
+    def initialize redirect_url: nil
+      raise NeAPIException "no redirect_url" if redirect_url.nil?
       @redirect_url = redirect_url
     end
 
@@ -101,7 +103,11 @@ module NeAPI
     
     #access_token/企業情報取得
     def api_neauth uid , state
-      response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
+      @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
+      @ne_user
+    end
+    def tokens
+      @ne_user.nil?  nil : {access_token: @ne_user["access_token"], refresh_token: @ne_user["refresh_token"]}
     end
   end
 end
