@@ -1,0 +1,232 @@
+---
+:master_goods:
+  :method:
+  - count
+  - search
+  - upload
+  :prefix: goods
+  :fields: id,name,jan_code
+:master_stock:
+  :method:
+  - count
+  - search
+  :prefix: stock
+  :fields: goods_id,quantity,allocation_quantity,defective_quantity,remaining_order_quantity,out_quantity,free_quantity,advance_order_quantity,advance_order_allocation_quantity,advance_order_free_quantity
+:master_mailtag:
+  :method:
+  - count
+  - search
+  :prefix: mail_tag
+  :fields: id,month,name,note,message1,message2,message3,message4,message5,message6
+:master_goodstag:
+  :method:
+  - count
+  - search
+  :prefix: goods_tag
+  :fields: goods_id,name
+:master_supplier:
+  :method:
+  - count
+  - search
+  :prefix: supplier
+  :fields: id,name,post
+:master_wholesale:
+  :method:
+  - count
+  - search
+  :prefix: wholesale
+  :fields: id,name,post_name,destination_no
+:master_stockiohistory:
+  :method:
+  - count
+  - search
+  :prefix: stock_io_history
+  :fields: id,shop_id,goods_id,date,before_stock_quantity,after_stock_quantity,before_bad_stock_quantity,after_bad_stock_quantity,quantity,cut_form_id,io_flag,io_type_id,io_type_name,reason,pic_id,pic_name
+:master_pagebase:
+  :method:
+  - count
+  - search
+  :prefix: page_base
+  :fields: goods_id,goods_name
+:master_pagebasevariationoroption:
+  :method:
+  - count
+  - search
+  :prefix: page_base_v_o
+  :fields: goods_id,option_category,option_name,horizontal_value,vertical_value,horizontal_name,vertical_name,type,display_order
+:master_shop:
+  :method:
+  - count
+  - search
+  :prefix: shop
+  :fields: id,name,kana,abbreviated_name,handling_goods_name,note,mall_id,authorization_type_id,authorization_type_name,tax_id,tax_name,currency_unit_id,currency_unit_name,tax_calculation_sequence_id,type_id,deleted_flag
+:master_goodsimage:
+  :method:
+  - count
+  - search
+  :prefix: goods_image
+  :fields: id,goods_id,file_name,url_http,url_https,size,width,height,alt,convert_flg,display_order,status
+:master_goodsimagetag:
+  :method:
+  - count
+  - search
+  :prefix: goods_image_tag
+  :fields: id,goods_image_id,image_tag_id
+:master_goodscategory:
+  :method:
+  - count
+  - search
+  :prefix: goods_category
+  :fields: id,goods_id,mall_id,mall_category_id,text
+:login_user:
+  :method:
+  - info
+:login_company:
+  :method:
+  - info
+:system_credittype:
+  :method:
+  - info
+:system_creditauthorizationcenter:
+  :method:
+  - info
+:system_creditapprovaltype:
+  :method:
+  - info
+:system_order:
+  :method:
+  - info
+:system_ordercondition:
+  :method:
+  - info
+:system_delivery:
+  :method:
+  - info
+:system_fraction:
+  :method:
+  - info
+:system_returnedreason:
+  :method:
+  - info
+:system_canceltype:
+  :method:
+  - info
+:system_orderstatus:
+  :method:
+  - info
+:system_importantcheck:
+  :method:
+  - info
+:system_confirmcheck:
+  :method:
+  - info
+:system_customertype:
+  :method:
+  - info
+:system_deposittype:
+  :method:
+  - info
+:system_iotype:
+  :method:
+  - info
+:system_select:
+  :method:
+  - info
+:system_paymentmethod:
+  :method:
+  - info
+:system_payout:
+  :method:
+  - info
+:system_socialinsurance:
+  :method:
+  - info
+:system_goodstype:
+  :method:
+  - info
+:system_goodsstatus:
+  :method:
+  - info
+:system_merchandise:
+  :method:
+  - info
+:system_importtype:
+  :method:
+  - info
+:system_forwardingmethod:
+  :method:
+  - info
+:system_tax:
+  :method:
+  - info
+:system_itemname:
+  :method:
+  - info
+:system_pagestatus:
+  :method:
+  - info
+:system_authorizationtype:
+  :method:
+  - info
+:system_currencyunit:
+  :method:
+  - info
+:system_que:
+  :method:
+  - count
+  - search
+  :prefix: que
+  :fields: id,method_name,shop_id,upload_name,client_file_name,file_name,status_id,message
+:system_mall:
+  :method:
+  - count
+  - search
+  :prefix: mall
+  :fields: id,name,kana,note,country_id
+:system_imagetag:
+  :method:
+  - count
+  - search
+  :prefix: image_tag
+  :fields: id,mall_id,mall_sub_id,text,auto_register_no,display_order
+:system_mallcategory:
+  :method:
+  - count
+  - search
+  :prefix: mall_category
+  :fields: id,mall_id,code,parent_mall_category_id,name,full_name
+:receiveorder_uploadpattern:
+  :method:
+  - info
+:receiveorder_base:
+  :method:
+  - count
+  - search
+  - update
+  - upload
+  - receipted
+  - shipped
+  - labelprinted
+  - divide
+  :prefix: receive_order
+  :fields: shop_id,id,shop_cut_form_id,date,import_date
+  :query:
+    receive_order_order_status_name-like: "納品書印刷待ち"
+:receiveorder_row:
+  :method:
+  - count
+  - search
+  :prefix: receive_order_row
+  :fields: receive_order_id,shop_cut_form_id,no,shop_row_no,goods_id,goods_name,quantity,unit_price
+:receiveorder_forwardingagent:
+  :method:
+  - count
+  - search
+  :prefix: forwarding_agent
+  :fields: id,type,type_id,type_name,display_order,deleted_flag
+:receiveorder_confirm:
+  :method:
+  - count
+  - search
+  :prefix: confirm
+  :fields: id,name,display_order,html,value,valid_flag
