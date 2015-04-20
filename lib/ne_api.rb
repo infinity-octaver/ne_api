@@ -94,7 +94,7 @@ module NeAPI
     
     def initialize redirect_url: nil
       Dotenv.load
-      raise NeAPIException "no redirect_url" if redirect_url.nil?
+      raise NeAPIException, "no redirect_url" if redirect_url.nil?
       @redirect_url = redirect_url
     end
 
