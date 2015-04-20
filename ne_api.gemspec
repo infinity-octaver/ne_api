@@ -24,5 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'oauth'
   spec.add_dependency 'i18n'
   spec.add_dependency 'activesupport'
-  
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'rspec-rails', '~> 2.6'
 end
