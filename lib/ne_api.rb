@@ -95,8 +95,6 @@ module NeAPI
     def initialize redirect_url: nil
       Dotenv.load
       raise NeAPIException, "no redirect_url" if redirect_url.nil?
-      CLIENT_ID = ENV["CLIENT_ID"]
-      CLIENT_SECRET = ENV["CLIENT_SECRET"]
       @redirect_url = redirect_url
     end
 
@@ -106,7 +104,7 @@ module NeAPI
     end
     
     #access_token/企業情報取得
-    def api_neauth uid , state
+    def sign_in client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
       @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
       @ne_user
     end
