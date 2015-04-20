@@ -4,6 +4,7 @@ require 'yaml'
 require 'json'
 require 'active_support'
 require 'active_support/core_ext'
+require 'dotenv'
 
 module NeAPI
   API_SERVER_HOST = "https://api.next-engine.org"
@@ -92,7 +93,10 @@ module NeAPI
     attr_accessor :redirect_url, :ne_user
     
     def initialize redirect_url: nil
+      Dotenv.load
       raise NeAPIException "no redirect_url" if redirect_url.nil?
+      CLIENT_ID = ENV["CLIENT_ID"]
+      CLIENT_SECRET = ENV["CLIENT_SECRET"]
       @redirect_url = redirect_url
     end
 
