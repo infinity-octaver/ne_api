@@ -4,6 +4,7 @@ require 'yaml'
 require 'json'
 require 'active_support'
 require 'active_support/core_ext'
+require 'dotenv'
 
 module NeAPI
   API_SERVER_HOST = "https://api.next-engine.org"
@@ -92,12 +93,13 @@ module NeAPI
     attr_accessor :redirect_url, :ne_user
     
     def initialize redirect_url: nil
+      Dotenv.load
       raise NeAPIException "no redirect_url" if redirect_url.nil?
       @redirect_url = redirect_url
     end
 
     #uid/state取得
-    def sign_in client_id, client_secret
+    def sign_in client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
       Launchy.open NE_SERVER_HOST + SIGN_IN_PATH + "?client_id="+client_id+"&client_secret="+client_secret+"&redirect_uri="+@redirect_url
     end
     
@@ -111,6 +113,6 @@ module NeAPI
     end
   end
 end
-
 class NeAPIException  < StandardError
 end
+
