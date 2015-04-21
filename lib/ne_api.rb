@@ -33,7 +33,7 @@ module NeAPI
     attr_accessor :access_token, :refresh_token
     PATH_PREFIX="/api_v1_"
 
-    def initialize access_token: access_token,referesh_token: refresh_token
+    def initialize access_token: access_token, refresh_token: refresh_token
       @@params = YAML.load_file("config/api.yaml")
       @access_token = access_token
       @refresh_token = refresh_token
