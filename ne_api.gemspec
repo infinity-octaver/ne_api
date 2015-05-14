@@ -27,4 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec'
   spec.add_dependency 'dotenv'
   spec.add_dependency 'launchy'
+  spec.add_dependency 'redis'
+  spec.add_dependency 'hiredis'
+  spec.add_dependency 'recommendify'
 end

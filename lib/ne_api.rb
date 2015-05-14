@@ -5,6 +5,7 @@ require 'json'
 require 'active_support'
 require 'active_support/core_ext'
 require 'dotenv'
+require 'recommendify'
 
 module NeAPI
   API_SERVER_HOST = "https://api.next-engine.org"
@@ -110,6 +111,26 @@ module NeAPI
     end
     def tokens
       @ne_user.nil? ?  nil : {access_token: @ne_user["access_token"], refresh_token: @ne_user["refresh_token"]}
+    end
+  end
+
+  class MyRecommender < Recommendify::Base
+      max_neighbors 50
+      input_matrix :order_items, {:similarity_func => :jaccard, :weight => 5.0}
+
+    include NeAPI
+    def initialize
+      Recommendify.redis = Redis.new
+      super
+    end
+    def recommend product_id: product_id, access_token: access_token, refresh_token: refresh_token
+      raise NeAPIException, "no product_id" if product_id.nil?
+      m=Master.new access_token: access_token, refresh_token: access_token
+      orders=m.receiveorder_row_search(fields: "receive_order_row_receive_order_id", "receive_order_row_goods_id-like" => product_id.to_s).collect{|o| o["receive_order_row_receive_order_id"].to_i} #その商品を含む注文全ての伝票番号
+      users=m.receiveorder_base_search(fields: "receive_order_customer_id", "receive_order_id-in" => orders.uniq.inspect.delete("[]")).collect{|c| c["receive_order_customer_id"]} #その商品を買った顧客ID
+      #users.each {|u| order_items.add_set(u, m.receiveorder_row_search(fields: "receive_order_row_goods_id", "receive_order_row_receive_order_id-in" => (m.receiveorder_base_search(fields: "receive_order_id", "receive_order_customer-like" => u).collect{|g| g["receive_order_id"]}).inspect.delete("[]")))}
+      process_item!(product_id.to_s)
+      self.for(product_id.to_s)
     end
   end
 end
