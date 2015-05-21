@@ -33,7 +33,7 @@ module NeAPI
     attr_accessor :access_token, :refresh_token
     PATH_PREFIX="/api_v1_"
 
-    def initialize access_token: access_token,referesh_token: refresh_token
+    def initialize access_token: access_token, refresh_token: refresh_token
       @@params = YAML.load_file("config/api.yaml")
       @access_token = access_token
       @refresh_token = refresh_token
@@ -99,8 +99,8 @@ module NeAPI
     end
 
     #uid/state取得
-    def sign_in
-      Launchy.open NE_SERVER_HOST + SIGN_IN_PATH + "?client_id="+CLIENT_ID+"&client_secret="+CLIENT_SECRET+"&redirect_uri="+@redirect_url
+    def sign_in client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
+      Launchy.open NE_SERVER_HOST + SIGN_IN_PATH + "?client_id="+client_id+"&client_secret="+client_secret+"&redirect_uri="+@redirect_url
     end
     
     #access_token/企業情報取得
@@ -109,10 +109,10 @@ module NeAPI
       @ne_user
     end
     def tokens
-      @ne_user.nil?  nil : {access_token: @ne_user["access_token"], refresh_token: @ne_user["refresh_token"]}
+      @ne_user.nil? ?  nil : {access_token: @ne_user["access_token"], refresh_token: @ne_user["refresh_token"]}
     end
   end
 end
-
 class NeAPIException  < StandardError
 end
+
