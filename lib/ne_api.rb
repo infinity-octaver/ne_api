@@ -104,7 +104,7 @@ module NeAPI
     end
     
     #access_token/企業情報取得
-    def sign_in client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
+    def ne_auth client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
       @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
       @ne_user
     end
