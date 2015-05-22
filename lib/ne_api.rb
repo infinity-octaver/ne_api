@@ -34,12 +34,13 @@ module NeAPI
     PATH_PREFIX="/api_v1_"
 
     def initialize access_token: access_token, refresh_token: refresh_token
-      @@params = YAML.load_file("config/api.yaml")
+      @@params = YAML.load_file(File.join(File.dirname(__FILE__),"../config/api.yaml"))
       @access_token = access_token
       @refresh_token = refresh_token
     end
 
     def post method: nil , model: nil, query: nil, fields: nil, get_key: nil
+      p query
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
       if fields.present?
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query))
@@ -57,13 +58,12 @@ module NeAPI
       end
       model = models.captures.first.to_sym
       method = path.to_s.split("_").last
-
+      
       if @@params.key?(model) && @@params[model][:method].include?(method)
         get_key = nil
         fields = nil
         case method
         when  "count"
-          query = nil
           get_key = "count"
         when "search"
           req= @@params[model]
