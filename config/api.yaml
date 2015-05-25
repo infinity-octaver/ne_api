@@ -216,7 +216,7 @@
   - count
   - search
   :prefix: receive_order_row
-  :fields: receive_order_id,shop_cut_form_id,no,shop_row_no,goods_id,goods_name,quantity,unit_price
+  :fields: receive_order_id,shop_cut_form_id,no,shop_row_no,goods_id,goods_name,quantity,unit_price,wholesale_retail_ratio,goods_option
 :receiveorder_forwardingagent:
   :method:
   - count

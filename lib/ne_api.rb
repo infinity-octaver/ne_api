@@ -39,36 +39,41 @@ module NeAPI
       @refresh_token = refresh_token
     end
 
-    def post method: nil , model: nil, query: nil, fields: nil, get_key: nil
-      p query
+    def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
-      if fields.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query))
+
+      if fields.present? && query.present?
+        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params))
+      elsif fields.present?
+        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(params))
       elsif query.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(query))
+        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(query).merge(params))
       else
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token})
+        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(params))
       end
       get_key.present? ? res[get_key]  : res
     end
-    def method_missing(path, query={})
+    def method_missing(path, args={})
       super if @@params.nil? || path.nil?
       unless models = /^(.*)_.*$/.match(path.to_s)
         super
       end
       model = models.captures.first.to_sym
       method = path.to_s.split("_").last
-      
+
       if @@params.key?(model) && @@params[model][:method].include?(method)
         get_key = nil
-        fields = nil
+        query = (args[:query].present? ? args[:query] : nil)
+        fields = (args[:fields].present? ? args[:fields] : nil)
+        params = (args[:params].present? ? args[:params] : {})
         case method
         when  "count"
           get_key = "count"
         when "search"
           req= @@params[model]
           query ||= req[:query]
-          fields=req[:fields].gsub(/^\s*/,req[:prefix]+"_").gsub(/,\s*/,","+@@params[model][:prefix]+"_")
+          fields ||= req[:fields].gsub(/^\s*/,req[:prefix]+"_").gsub(/,\s*/,","+@@params[model][:prefix]+"_")
+          fields= fields
           get_key = "data"
         when "info"
           query = nil
@@ -79,7 +84,7 @@ module NeAPI
         else
           super
         end
-        self.post method: method, model: model, query: query, fields: fields, get_key: get_key
+        self.post method: method, model: model, query: query, fields: fields, get_key: get_key, params: params
       else
         super
       end
