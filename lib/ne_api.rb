@@ -51,6 +51,10 @@ module NeAPI
       else
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(params))
       end
+      
+      @access_token = res["access_token"] if res["access_token"].present?
+      @referesh_token = res["referesh_token"] if res["referesh_token"].present?
+
       get_key.present? ? res[get_key]  : res
     end
     def method_missing(path, args={})
@@ -98,7 +102,6 @@ module NeAPI
     attr_accessor :redirect_url, :ne_user
     
     def initialize redirect_url: nil
-      Dotenv.load
       raise NeAPIException, "no redirect_url" if redirect_url.nil?
       @redirect_url = redirect_url
     end
