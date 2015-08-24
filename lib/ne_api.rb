@@ -39,20 +39,18 @@ module NeAPI
       @refresh_token = refresh_token
     end
 
-    def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
+    def post method: nil , model: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
-
-      if fields.present? && query.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params))
-      elsif fields.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(params))
-      elsif query.present?
+      if params.key?(:query)
+        query=params[:query]
+        params.delete(:query)
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(query).merge(params))
       else
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(params))
       end
       get_key.present? ? res[get_key]  : res
     end
+
     def method_missing(path, args={})
       super if @@params.nil? || path.nil?
       unless models = /^(.*)_.*$/.match(path.to_s)
@@ -63,28 +61,68 @@ module NeAPI
 
       if @@params.key?(model) && @@params[model][:method].include?(method)
         get_key = nil
-        query = (args[:query].present? ? args[:query] : nil)
-        fields = (args[:fields].present? ? args[:fields] : nil)
         params = (args[:params].present? ? args[:params] : {})
+        params[:wait_flag] = args[:wait_flag] if args[:wait_flag].present?
         case method
+        when "info"
         when  "count"
           get_key = "count"
-        when "search"
           req= @@params[model]
-          query ||= req[:query]
-          fields ||= req[:fields].gsub(/^\s*/,req[:prefix]+"_").gsub(/,\s*/,","+@@params[model][:prefix]+"_")
-          fields= fields
+          params[:query] = (args[:query].present? ? args[:query] : req[:query])
+          params[:query] ||= {}
+        when "search"
           get_key = "data"
-        when "info"
-          query = nil
-        when "update", "upload", "receipted", "shipped", "labelprinted"
+          req= @@params[model]
+          params[:query] = (args[:query].present? ? args[:query] : req[:query])
+          params[:query] ||= {}
+          default_fields = req[:fields].gsub(/^\s*/,req[:prefix]+"_").gsub(/,\s*/,","+@@params[model][:prefix]+"_")
+          params[:fields] = (args[:fields].present? ? args[:fields] : default_fields)
+          params[:offset] = args[:offset] if args[:offset].present?
+          params[:limit] = args[:limit] if args[:limit].present?
+        when "update"
+          get_key = result
+          if(model == receiveorder_base)
+            raise NeAPIException, "too few parameters" unless args[:receive_order_id].present? && args[:receive_order_last_modified_date].present? && args[:data].present?
+            params[:receive_order_id] = args[:receive_order_id]
+            params[:receive_order_last_modified_date] = args[:receive_order_last_modified_date]
+            params[:data] = args[:data]
+            params[:receive_order_shipped_update_flag] = args[:receive_order_shipped_update_flag] if args[:receive_order_shipped_update_flag].present?
+          else
+            raise NeAPIException, "too few parameters" unless args[:shop_id].present? && args[:shop_last_modified_date].present? && args[:data].present?
+            params[:shop_id] = args[:shop_id]
+            params[:shop_last_modified_date] = args[:shop_last_modified_date]
+            params[:data] = args[:data]
+          end
+        when "upload"
+          if(model == "receiveorder_base")
+            raise NeAPIException, "too few parameters" unless args[:receive_order_upload_pattern_id].present? && args[:data_type_1].present? && args[:data_1].present?
+            params[:receive_order_upload_pattern_id] = args[:receive_order_upload_pattern_id]
+            params[:data_type_1] = args[:data_type_1]
+            params[:data_1] = args[:data_1]
+            params[:data_type_2] = args[:data_type_2] if args[:data_type_2].present?
+            params[:data_2] = args[:data_2] if args[:data_2].present?
+          else
+            raise NeAPIException, "too few parameters" unless args[:receive_order_upload_pattern_id].present? && args[:data_type_1].present? && args[:data_1].present?
+            params[:data_type] = args[:data_type]
+            params[:data] = args[:data]
+          end
+        when "receipted", "shipped", "labelprinted"
           get_key = "result"
+          raise NeAPIException, "too few parameters" unless args[:receive_order_id].present? && args[:receive_order_last_modified_date].present?
+          params[:receive_order_id] = args[:receive_order_id]
+          params[:receive_order_last_modified_date] = args[:receive_order_last_modified_date]
+          params[:receive_order_label_print_flag] = args[:receive_order_label_print_flag] if args[:receive_order_label_print_flag].present?
         when "divide"
           get_key = "receive_order_id"
+          raise NeAPIException, "too few parameters" unless args[:receive_order_id].present? && args[:receive_order_last_modified_date].present? && args[:data].present?
+          params[:receive_order_id] = args[:receive_order_id]
+          params[:receive_order_last_modified_date] = args[:receive_order_last_modified_date]
+          params[:data] = args[:data]
+          params[:credit_unauthorized_flag] = args[:credit_unauthorized_flag] if args[:credit_unauthorized_flag].present?
         else
           super
         end
-        self.post method: method, model: model, query: query, fields: fields, get_key: get_key, params: params
+        self.post method: method, model: model, get_key: get_key, params: params
       else
         super
       end
