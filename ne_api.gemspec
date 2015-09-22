@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["yuuna.m@gmail.com"]
   spec.summary       = %q{Next Engine API for ruby}
   spec.description   = %q{Next Engine API for ruby}
-  spec.homepage      = ""
+  spec.homepage      = "http://github.com/infinity-octaver/ne_api/"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
