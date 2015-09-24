@@ -51,9 +51,8 @@ module NeAPI
       else
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(params))
       end
-      
       @access_token = res["access_token"] if res["access_token"].present?
-      @referesh_token = res["referesh_token"] if res["referesh_token"].present?
+      @refresh_token = res["refresh_token"] if res["refresh_token"].present?
 
       get_key.present? ? res[get_key]  : res
     end
