@@ -30,18 +30,24 @@ module NeAPI
 
   class Master
     include NeAPI
-    attr_accessor :access_token, :refresh_token
+    attr_accessor :access_token, :refresh_token, :wait_flag
     PATH_PREFIX="/api_v1_"
 
     def initialize access_token: access_token, refresh_token: refresh_token
       @@params = YAML.load_file(File.join(File.dirname(__FILE__),"../config/api.yaml"))
       @access_token = access_token
       @refresh_token = refresh_token
+      @wait_flag = false
     end
 
+    def force_import
+      @wait_flag = true
+    end
+    
     def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
-
+      params = params.merge({wait_flag: 1}) if @wait_flag
+      
       if fields.present? && query.present?
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params))
       elsif fields.present?
