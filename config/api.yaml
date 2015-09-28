@@ -58,6 +58,7 @@
   :method:
   - count
   - search
+  - checkconnect
   :prefix: shop
   :fields: id,name,kana,abbreviated_name,handling_goods_name,note,mall_id,authorization_type_id,authorization_type_name,tax_id,tax_name,currency_unit_id,currency_unit_name,tax_calculation_sequence_id,type_id,deleted_flag
 :master_goodsimage:

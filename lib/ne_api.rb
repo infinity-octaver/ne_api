@@ -43,6 +43,11 @@ module NeAPI
     def force_import
       @wait_flag = true
     end
+
+    def update_token
+      
+    end
+    
     
     def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
@@ -90,6 +95,9 @@ module NeAPI
           get_key = "result"
         when "divide"
           get_key = "receive_order_id"
+        when "checkconnect"
+          fields = nil
+          get_key = nil
         else
           super
         end
