@@ -22,7 +22,7 @@ module NeAPI
   def response response
     body = JSON.parse response.body
     if body["result"] != "success"
-      raise NeAPIException,  body["message"]
+      raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
       return false
     end
     body
