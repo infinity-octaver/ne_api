@@ -22,7 +22,11 @@ module NeAPI
   def response response
     body = JSON.parse response.body
     if body["result"] != "success"
-      raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
+      if self.wait_flag && (body["code"] == "003001" || body["code"] == "003002")
+        return false
+      else
+        raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
+      end
       return false
     end
     body
@@ -54,14 +58,27 @@ module NeAPI
       params = params.merge({wait_flag: 1}) if @wait_flag
       
       if fields.present? && query.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params))
+        post_args = {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params)
+
       elsif fields.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(params))
+        post_args =  {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(params)
       elsif query.present?
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(query).merge(params))
+        post_args = {access_token: @access_token, refresh_token: @refresh_token}.merge(query).merge(params)
       else
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, {access_token: @access_token, refresh_token: @refresh_token}.merge(params))
+        post_args = {access_token: @access_token, refresh_token: @refresh_token}.merge(params)
       end
+      res = false
+      
+      30.times do
+        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, post_args)
+        sleep(3)
+        break if res != false
+      end
+      if res == false
+        raise NeAPIException,  "Next Engineが大変混み合っているようです"
+        return false
+      end
+      
       @access_token = res["access_token"] if res["access_token"].present?
       @refresh_token = res["refresh_token"] if res["refresh_token"].present?
 
@@ -112,10 +129,11 @@ module NeAPI
     include NeAPI
     SIGN_IN_PATH = "/users/sign_in/"
     NEAUTH_PATH = "/api_neauth/"
-    attr_accessor :redirect_url, :ne_user
+    attr_accessor :redirect_url, :ne_user, :wait_flag
     
     def initialize redirect_url: nil
       raise NeAPIException, "no redirect_url" if redirect_url.nil?
+      @wait_flag = false
       @redirect_url = redirect_url
     end
 
