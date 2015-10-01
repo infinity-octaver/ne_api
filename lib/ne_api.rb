@@ -71,8 +71,8 @@ module NeAPI
       
       30.times do
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, post_args)
-        sleep(3)
         break if res != false
+        sleep(3)
       end
       if res == false
         raise NeAPIException,  "Next Engineが大変混み合っているようです"
