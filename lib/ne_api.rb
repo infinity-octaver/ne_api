@@ -55,7 +55,7 @@ module NeAPI
     
     def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
-      params = params.merge({wait_flag: 1}) if @wait_flag
+      #params = params.merge({wait_flag: 1}) if @wait_flag
       
       if fields.present? && query.present?
         post_args = {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params)
