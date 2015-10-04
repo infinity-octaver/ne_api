@@ -22,7 +22,7 @@ module NeAPI
   def response response
     body = JSON.parse response.body
     if body["result"] != "success"
-      if self.wait_flag && (body["code"] == "003001" || body["code"] == "003002")
+      if (body["code"] == "003001" || body["code"] == "003002")
         return false
       else
         raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
@@ -34,7 +34,7 @@ module NeAPI
 
   class Master
     include NeAPI
-    attr_accessor :access_token, :refresh_token, :wait_flag
+    attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval
     PATH_PREFIX="/api_v1_"
 
     def initialize access_token: access_token, refresh_token: refresh_token
@@ -42,6 +42,8 @@ module NeAPI
       @access_token = access_token
       @refresh_token = refresh_token
       @wait_flag = false
+      @retry_num = 1
+      @wait_interval = 30
     end
 
     def force_import
@@ -55,7 +57,7 @@ module NeAPI
     
     def post method: nil , model: nil, query: nil, fields: nil, get_key: nil, params: {}
       raise NeAPIException, "no token!" if @access_token.nil? || @refresh_token.nil?
-      #params = params.merge({wait_flag: 1}) if @wait_flag
+      params = params.merge({wait_flag: 1}) if @wait_flag
       
       if fields.present? && query.present?
         post_args = {access_token: @access_token, refresh_token: @refresh_token, fields: fields}.merge(query).merge(params)
@@ -69,13 +71,13 @@ module NeAPI
       end
       res = false
       
-      30.times do
+      self.retry_num.times do
         res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, post_args)
         break if res != false
-        sleep(3)
+        sleep(self.wait_interval)
       end
       if res == false
-        raise NeAPIException,  "Next Engineが大変混み合っているようです"
+        raise NeAPIException,  "003001:Next Engineが大変混み合っています。APIの接続を#{self.retry_num}回、#{self.wait_interval}秒間隔でアクセスを試みましたが、失敗をしました"
         return false
       end
       
@@ -145,6 +147,7 @@ module NeAPI
     #access_token/企業情報取得
     def ne_auth uid, state
       @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
+      raise NeAPIException, "003001:Next Engineが大変混み合っているようです" if @ne_user == false
       @ne_user
     end
     def tokens
