@@ -37,13 +37,13 @@ module NeAPI
     attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval
     PATH_PREFIX="/api_v1_"
 
-    def initialize access_token: access_token, refresh_token: refresh_token
+    def initialize access_token: "", refresh_token: ""
       @@params = YAML.load_file(File.join(File.dirname(__FILE__),"../config/api.yaml"))
       @access_token = access_token
       @refresh_token = refresh_token
       @wait_flag = false
-      @retry_num = 1
-      @wait_interval = 30
+      @retry_num = 10
+      @wait_interval = 15
     end
 
     def force_import

@@ -35,16 +35,16 @@ class MyApp < Sinatra::Base
     CLIENT_SECRET = "XXXX"
     CALLBACK_URI = "https://localhost:3000/callback"
 	get "/" do
-	    "<a href=" + NeAPI::NE_SERVER_HOST + NeAPI::Auth::SIGN_IN_PATH + "?client_id="+CLIENT_ID+"&client_secret="+CLIENT_SECRET+"&redirect_uri="+ CALLBACK_URI + ">Connect with Next Engine</a>"
+	  "<a href=" + NeAPI::NE_SERVER_HOST + NeAPI::Auth::SIGN_IN_PATH + "?client_id="+CLIENT_ID+"&client_secret="+CLIENT_SECRET+"&redirect_uri="+ CALLBACK_URI + ">Connect with Next Engine</a>"
 	end
 
   get "/callback" do
-      auth = NeAPI::Auth.new redirect_url: CALLBACK_URI
-      res = auth.ne_auth params[:uid], params[:state]
-	    session[:access_token] =  res["access_token"]
-	    session[:refresh_token] =  res["refresh_token"]
-		  redirect "/home"
-	end
+    auth = NeAPI::Auth.new redirect_url: CALLBACK_URI
+    res = auth.ne_auth params[:uid], params[:state]
+    session[:access_token] =  res["access_token"]
+    session[:refresh_token] =  res["refresh_token"]
+    redirect "/home"
+  end
 
   get "/home" do
     redirect "/" if session[:access_token].nil? || session[:refresh_token].nil?
@@ -60,29 +60,29 @@ class MyApp < Sinatra::Base
   end
 
   get "/receiveorder/search" do
-      content_type :text
-      result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).receiveorder_base_search)
-	    result.inspect
-	end
+    content_type :text
+    result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).receiveorder_base_search)
+	  result.inspect
+  end
 
   get "/login_user/info" do
-      content_type :text
-      result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).login_user_info)
-	    update_token result
-	    result["data"].first.inspect
-	end
+    content_type :text
+    result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).login_user_info)
+	  update_token result
+	  result["data"].first.inspect
+  end
 
   get "/login_company/info" do
-      content_type :text
-      result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).login_company_info)
-	    update_token result
-	    result["data"].first.inspect
-	end
+    content_type :text
+    result = (NeAPI::Master.new(access_token: session["access_token"], refresh_token: session["refresh_token"]).login_company_info)
+	  update_token result
+	  result["data"].first.inspect
+  end
 
   def update_token res
-      session[:access_token] =  res["access_token"]
-      session[:refresh_token] =  res["refresh_token"]
-	end
+    session[:access_token] =  res["access_token"]
+    session[:refresh_token] =  res["refresh_token"]
+  end
 
 end
 
@@ -91,9 +91,9 @@ MyApp.run! host: 'localhost', port: 3000 do |server|
 
   ssl_options = {
       :verify_peer => false
-        }
-	server.ssl = true
-	server.ssl_options = ssl_options
+  }
+  server.ssl = true
+  server.ssl_options = ssl_options
 end
 
 ```
@@ -105,3 +105,9 @@ end
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+## Update
+
+### ver0.0.6
+  * Ruby2.2対応
+  * リトライ回数のデフォルト値変更
