@@ -5,7 +5,7 @@ require 'ne_api/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "ne_api"
-  spec.version       = NeApi::VERSION
+  spec.version       = NeAPI::VERSION
   spec.authors       = ["Yuuna Kurita","Mika Koizumi"]
   spec.email         = ["yuuna.m@gmail.com"]
   spec.summary       = %q{Next Engine API for ruby}
