@@ -11,6 +11,8 @@ module NeAPI
   NE_SERVER_HOST = "https://base.next-engine.org"
 
   private
+
+  
   def conn
     @conn ||= Faraday::Connection.new(url: API_SERVER_HOST) do |builder|
       builder.use Faraday::Request::UrlEncoded
@@ -34,7 +36,7 @@ module NeAPI
 
   class Master
     include NeAPI
-    attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval
+    attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval, :access_token_end_date, :refresh_token_end_date
     PATH_PREFIX="/api_v1_"
 
     def initialize access_token: "", refresh_token: ""
@@ -83,6 +85,8 @@ module NeAPI
       
       @access_token = res["access_token"] if res["access_token"].present?
       @refresh_token = res["refresh_token"] if res["refresh_token"].present?
+      @access_token_end_date  = res["access_token_end_date"] if res["access_token_end_date"].present?
+      @refresh_token_end_date  = res["refresh_token_end_date"] if res["refresh_token_end_date"].present?
 
       get_key.present? ? res[get_key]  : res
     end
