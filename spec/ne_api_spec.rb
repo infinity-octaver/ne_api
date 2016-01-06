@@ -1,7 +1,7 @@
 require 'yaml'
 require 'ne_api.rb'
 
-SEARCH_MODEL=["receiveorder_base", "receiveorder_row", "receiveorder_forwardingagent", "receiveorder_confirm", "master_goods", "master_stock", "master_mailtag", "master_goodstag", "master_supplier", "master_wholesale", "master_stockiohistory", "master_pagebase", "master_pagebasevariationoroption", "master_shop", "master_goodsimage", "master_goodsimagetag", "master_goodscategory", "system_que", "system_mall", "system_imagetag", "system_mallcategory"]
+SEARCH_MODEL=["receiveorder_base", "receiveorder_row", "receiveorder_forwardingagent", "receiveorder_confirm", "receiveorder_option", "receiveorder_paymentdeliveryconvert", "master_goods", "master_stock", "master_mailtag", "master_goodstag", "master_supplier", "master_wholesale", "master_stockiohistory", "master_pagebase", "master_pagebasevariationoroption", "master_shop", "master_goodsimage", "master_goodsimagetag", "master_goodscategory", "system_que", "system_mall", "system_imagetag", "system_mallcategory"]
 INFO_MODEL=["login_user", "login_company", "system_credittype", "system_creditauthorizationcenter", "system_creditapprovaltype", "system_order", "system_ordercondition", "system_delivery", "system_fraction", "system_returnedreason", "system_canceltype", "system_orderstatus", "system_importantcheck", "system_confirmcheck", "system_customertype", "system_deposittype", "system_iotype", "system_select", "system_paymentmethod", "system_payout", "system_socialinsurance", "system_goodstype", "system_goodsstatus", "system_merchandise", "system_importtype", "system_forwardingmethod", "system_tax", "system_itemname", "system_pagestatus", "receiveorder_uploadpattern", "system_authorizationtype", "system_currencyunit"]
 describe 'searchについて' do
   before(:all) do
