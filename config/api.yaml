@@ -198,6 +198,11 @@
   - search
   :prefix: mall_category
   :fields: id,mall_id,code,parent_mall_category_id,name,full_name
+:system_deliverydate:
+  :method:
+  - info
+  :prefix: delivery_date
+  :fields: id,name,days,note
 :receiveorder_uploadpattern:
   :method:
   - info
