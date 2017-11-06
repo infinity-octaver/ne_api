@@ -14,17 +14,18 @@ module NeAPI
 
   
   def conn
-    @conn ||= Faraday::Connection.new(url: API_SERVER_HOST) do |builder|
-      builder.use Faraday::Request::UrlEncoded
-      builder.use Faraday::Response::Logger
-      builder.use Faraday::Adapter::NetHttp
+    @conn ||=  Faraday.new(:url => API_SERVER_HOST) do |faraday|
+      faraday.request  :url_encoded             # form-encode POST params
+      faraday.response :logger                  # log requests to STDOUT
+      faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+      faraday.options[:timeout] =  600
     end
   end
 
   def response response
     body = JSON.parse response.body
     if body["result"] != "success"
-      if (body["code"] == "003001" || body["code"] == "003002")
+      if ["003001","003002","008003","009005","011007"].include?(body["code"])
         return false
       else
         raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
