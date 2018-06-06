@@ -146,12 +146,12 @@ module NeAPI
 
     #uid/state取得
     def sign_in client_id = ENV["CLIENT_ID"] , client_secret = ENV["CLIENT_SECRET"]
-      Launchy.open NE_SERVER_HOST + SIGN_IN_PATH + "?client_id="+client_id+"&client_secret="+client_secret+"&redirect_uri="+@redirect_url
+      Launchy.open NE_SERVER_HOST + SIGN_IN_PATH + "?client_id="+client_id+"&redirect_uri="+@redirect_url
     end
     
     #access_token/企業情報取得
-    def ne_auth uid, state
-      @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state})
+    def ne_auth uid, state, client_id = ENV["CLIENT_ID"], client_secret = ENV["CLIENT_SECRET"]
+      @ne_user = response ( conn.post NEAUTH_PATH, {uid: uid, state: state, client_id: client_id, client_secret: client_secret})
       raise NeAPIException, "003001:Next Engineが大変混み合っているようです" if @ne_user == false
       @ne_user
     end
