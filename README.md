@@ -24,6 +24,11 @@ Or install it yourself as:
 
 please read [API Document](http://api.next-e.jp/).
 
+## Global Environment
+
+CLIENT_ID ....... Get it from Next-Engine's 「アプリを作る」->「API」->「クライアントID」 page
+CLIENT_SECRET ... Get it from Next-Engine's 「アプリを作る」->「API」->「クライアントシークレット」 page
+
 ## Sample Application
 
 ```ruby
@@ -35,12 +40,12 @@ class MyApp < Sinatra::Base
     CLIENT_SECRET = "XXXX"
     CALLBACK_URI = "https://localhost:3000/callback"
 	get "/" do
-	  "<a href=" + NeAPI::NE_SERVER_HOST + NeAPI::Auth::SIGN_IN_PATH + "?client_id="+CLIENT_ID+"&client_secret="+CLIENT_SECRET+"&redirect_uri="+ CALLBACK_URI + ">Connect with Next Engine</a>"
+	  "<a href=" + NeAPI::NE_SERVER_HOST + NeAPI::Auth::SIGN_IN_PATH + "?client_id="+CLIENT_ID+"&redirect_uri="+ CALLBACK_URI + ">Connect with Next Engine</a>"
 	end
 
   get "/callback" do
     auth = NeAPI::Auth.new redirect_url: CALLBACK_URI
-    res = auth.ne_auth params[:uid], params[:state]
+    res = auth.ne_auth params[:uid], params[:state], CLIENT_ID, CLIENT_SECRET
     session[:access_token] =  res["access_token"]
     session[:refresh_token] =  res["refresh_token"]
     redirect "/home"
