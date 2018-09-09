@@ -112,6 +112,8 @@ end
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.11
+  * NEのログイン認証方式に変更
 
 ### ver0.0.9
   * リトライすべきエラーメッセージについてリトライするようにした
