@@ -249,3 +249,10 @@
   - search
   :prefix: payment_delivery_convert
   :fields: text,type,multi_id,delivery_id,deleted_flag,creation_date,last_modified_date,creator_id,creator_name,last_modified_by_id,last_modified_by_name
+:notice_execution:
+  :method:
+  - add
+  - count
+  - search
+  :prefix: execution_notice
+  :fields: id,success,title,content,read,creation_date,last_modified_date
