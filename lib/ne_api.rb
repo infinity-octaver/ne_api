@@ -115,7 +115,7 @@ module NeAPI
           get_key = "data"
         when "info"
           query = nil
-        when "update", "upload", "receipted", "shipped", "labelprinted", "add"
+        when "update", "upload", "receipted", "shipped", "labelprinted", "add", "bulkupdate", "bulkupdatereceipted"
           get_key = "result"
         when "divide"
           get_key = "receive_order_id"
