@@ -112,6 +112,9 @@ end
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.12
+  * 受注伝票一括更新・納品書印刷済み一括更新に対応
+
 ### ver0.0.11
   * NEのログイン認証方式に変更
 
