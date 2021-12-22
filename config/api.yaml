@@ -258,3 +258,31 @@
   - search
   :prefix: execution_notice
   :fields: id,success,title,content,read,creation_date,last_modified_date
+:master_goods_page:
+  :method:
+  - count
+  - search
+  :prefix: goods_page
+  :fields: goods_code
+:master_goods_page_variation:
+  :method:
+  - count
+  - search
+  :prefix: goods_page
+  :fields: goods_code,v_horizontal_name,v_vertical_name
+:master_goods_page_option:
+  :method:
+  - count
+  - search
+  :prefix: goods_page
+  :fields: goods_code,o_option_name,o_option_value
+:master_goods_page_shopcategory:
+  :method:
+  - count
+  - search
+  :prefix: goods_page
+  :fields: goods_code,c_shop_category_name
+  
+
+
+
