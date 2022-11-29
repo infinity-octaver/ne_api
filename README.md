@@ -112,6 +112,8 @@ end
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.16
+  * セット系APIに対応
 ### ver0.0.15
   * 商品ページ系APIに対応
 ### ver0.0.14

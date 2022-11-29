@@ -282,7 +282,14 @@
   - search
   :prefix: goods_page
   :fields: goods_code,c_shop_category_name
-  
+:master_setgoods:
+  :method:
+  - count
+  - search
+  - upload
+  :prefix: set_goods
+  :fields: id,name,selling_price,detail_goods_id,representation_id
+
 
 
 
