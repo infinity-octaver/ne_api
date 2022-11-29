@@ -289,7 +289,12 @@
   - upload
   :prefix: set_goods
   :fields: id,name,selling_price,detail_goods_id,representation_id
-
+:master_setstock:
+  :method:
+  - count
+  - search
+  :prefix: set_stock
+  :fields: set_goods_id,free_quantity,advance_order_free_quantity,type_id,last_modified_date
 
 
 
