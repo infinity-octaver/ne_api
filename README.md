@@ -112,6 +112,8 @@ end
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.18
+  * 受注税金内訳取得APIに対応
 ### ver0.0.17
   * セット在庫系APIに対応
 ### ver0.0.16
