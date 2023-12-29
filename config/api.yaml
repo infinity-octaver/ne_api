@@ -300,3 +300,11 @@
   - search
   :prefix: receive_order
   :fields: id,request_amount_tax0,request_amount_tax8,request_amount_tax10,request_amount_tax_tax8,request_amount_tax_tax10,charge_amount_tax0,charge_amount_tax8,charge_amount_tax10,other_amount_tax0,other_amount_tax8other_amount_tax10,distributed_coupon_amount_tax0,distributed_coupon_amount_tax8,distributed_coupon_amount_tax10,coupon_amount_tax0,coupon_amount_tax8,coupon_amount_tax10,coupon_amount_distribute,distributed_point_amount_tax0,distributed_point_amount_tax8,distributed_point_amount_tax10,point_amount_tax0,point_amount_tax8,point_amount_tax10,point_amount_distribute,point_amount_payment
+:warehouse_stock:
+  :method:
+  -count
+  - search
+  - upload
+  :prefix: warehouse_stock
+  :fields: warehouse_id,goods_id,quantity,allocation_quantity,free_quantity
+
