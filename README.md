@@ -103,6 +103,160 @@ end
 
 ```
 
+## Testing Support (RSpec)
+
+ne_api provides built-in stub classes for testing in Rails applications.
+
+### Setup
+
+Add to your `spec/rails_helper.rb`:
+
+```ruby
+require 'ne_api/testing'
+
+RSpec.configure do |config|
+  config.include NeAPI::Testing::RSpecHelpers
+end
+```
+
+### Basic Usage
+
+#### Using `with_fake_ne_api` block
+
+```ruby
+RSpec.describe OrderSyncService do
+  it "syncs orders from Next Engine" do
+    with_fake_ne_api do |fake|
+      # Stub API responses
+      fake.stub(:receiveorder_base_search, [
+        ne_receive_order(receive_order_id: "ORDER001", receive_order_total_amount: 5000),
+        ne_receive_order(receive_order_id: "ORDER002", receive_order_total_amount: 3000)
+      ])
+
+      service = OrderSyncService.new
+      result = service.sync
+
+      expect(result.count).to eq 2
+      expect(fake.called?(:receiveorder_base_search)).to be true
+      expect(fake.call_count(:receiveorder_base_search)).to eq 1
+    end
+  end
+end
+```
+
+#### Direct injection (recommended for services with DI)
+
+```ruby
+RSpec.describe StockService do
+  let(:fake_master) { fake_ne_master }
+
+  before do
+    fake_master.stub(:master_stock_search, [
+      ne_stock(stock_goods_id: "GOODS001", stock_quantity: 100)
+    ])
+  end
+
+  it "fetches stock data" do
+    service = StockService.new(ne_api: fake_master)
+    stocks = service.fetch_all
+
+    expect(stocks.first["stock_quantity"]).to eq 100
+  end
+end
+```
+
+### Simulating Errors
+
+```ruby
+it "handles API errors" do
+  with_fake_ne_api do |fake|
+    fake.simulate_error(code: "001001", message: "Authentication failed")
+
+    expect { service.sync }.to raise_error(NeAPIException, /001001/)
+  end
+end
+```
+
+### Authentication Testing
+
+```ruby
+RSpec.describe AuthController do
+  it "authenticates user" do
+    with_fake_ne_auth do |fake_auth|
+      fake_auth.stub_auth_response({
+        "access_token" => "custom_access_token",
+        "refresh_token" => "custom_refresh_token",
+        "company_ne_id" => "NE999999"
+      })
+
+      post :callback, params: { uid: "test_uid", state: "test_state" }
+
+      expect(session[:access_token]).to eq "custom_access_token"
+    end
+  end
+
+  it "handles authentication failure" do
+    with_fake_ne_auth do |fake_auth|
+      fake_auth.stub_auth_failure
+
+      expect {
+        post :callback, params: { uid: "test_uid", state: "test_state" }
+      }.to raise_error(NeAPIException)
+    end
+  end
+end
+```
+
+### Available Factory Methods
+
+| Method | Description |
+|--------|-------------|
+| `ne_goods(**attrs)` | Generate goods master data |
+| `ne_goods_list(count)` | Generate list of goods |
+| `ne_stock(**attrs)` | Generate stock data |
+| `ne_stock_list(count)` | Generate list of stocks |
+| `ne_receive_order(**attrs)` | Generate receive order data |
+| `ne_receive_order_list(count)` | Generate list of orders |
+| `ne_receive_order_row(**attrs)` | Generate order row data |
+| `ne_shop(**attrs)` | Generate shop data |
+| `ne_warehouse_stock(**attrs)` | Generate warehouse stock data |
+| `ne_company_info(**attrs)` | Generate company info |
+| `ne_user_info(**attrs)` | Generate user info |
+| `ne_error(code:, message:)` | Generate error response |
+
+### FakeMaster Methods
+
+| Method | Description |
+|--------|-------------|
+| `stub(method_name, response)` | Stub a specific API method |
+| `simulate_error(code:, message:)` | Enable error mode |
+| `clear_error` | Disable error mode |
+| `reset!` | Clear all stubs and history |
+| `called?(method_name)` | Check if method was called |
+| `call_count(method_name)` | Get call count |
+| `last_call_args(method_name)` | Get last call arguments |
+
+### Service Design for Testability
+
+For best testability, design your services to accept `ne_api` as a dependency:
+
+```ruby
+class OrderSyncService
+  def initialize(ne_api: nil)
+    @ne_api = ne_api || NeAPI::Master.new(
+      access_token: Rails.application.credentials.ne_access_token,
+      refresh_token: Rails.application.credentials.ne_refresh_token
+    )
+  end
+
+  def sync
+    @ne_api.receiveorder_base_search
+  end
+end
+```
+
+This allows easy injection of `FakeMaster` in tests.
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/ne_api/fork )
