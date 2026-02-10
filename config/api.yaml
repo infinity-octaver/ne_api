@@ -309,3 +309,9 @@
   :prefix: warehouse_stock
   :fields: warehouse_id,goods_id,quantity,allocation_quantity,free_quantity
 
+:warehouse_base:
+  :method
+  - count
+  - search
+  :prefix: warehouse
+  :fields: id,name,create_date
