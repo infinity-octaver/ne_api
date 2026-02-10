@@ -310,7 +310,7 @@
   :fields: warehouse_id,goods_id,quantity,allocation_quantity,free_quantity
 
 :warehouse_base:
-  :method
+  :method:
   - count
   - search
   :prefix: warehouse

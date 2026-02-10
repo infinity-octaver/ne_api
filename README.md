@@ -266,6 +266,8 @@ This allows easy injection of `FakeMaster` in tests.
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.22
+  * bug fix
 ### ver0.0.21
   * 倉庫別の在庫などに対応
   * rspecも作成
