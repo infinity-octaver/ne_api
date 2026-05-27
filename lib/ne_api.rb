@@ -93,13 +93,25 @@ module NeAPI
     end
     def method_missing(path, args={})
       super if @@params.nil? || path.nil?
-      unless models = /^(.*)_.*$/.match(path.to_s)
-        super
-      end
-      model = models.captures.first.to_sym
-      method = path.to_s.split("_").last
 
-      if @@params.key?(model) && @@params[model][:method].include?(method)
+      # path を「モデル名_メソッド名」に分解する。
+      # 旧実装は最後の "_" で分割していたが、bundle_candidate_groups のような
+      # 複数語メソッドに対応できなかった。登録済みモデル名との前方一致(最長一致優先)で
+      # 解決することで、単語数によらず正しい model / method を取り出す。
+      # 単一語メソッドでは旧実装と同じ結果になるため後方互換。
+      model = nil
+      method = nil
+      @@params.keys.sort_by { |key| -key.to_s.length }.each do |key|
+        prefix = "#{key}_"
+        next unless path.to_s.start_with?(prefix)
+        candidate = path.to_s[prefix.length..-1]
+        next unless @@params[key][:method].include?(candidate)
+        model = key
+        method = candidate
+        break
+      end
+
+      if model
         get_key = nil
         query = (args[:query].present? ? args[:query] : nil)
         fields = (args[:fields].present? ? args[:fields] : nil)
@@ -119,6 +131,12 @@ module NeAPI
           get_key = "result"
         when "divide"
           get_key = "receive_order_id"
+        when "bundle"
+          # 受注伝票一括同梱: ジョブ毎の結果配列(results)を返す
+          get_key = "results"
+        when "bundle_candidate_groups"
+          # 同梱候補グループ取得: 同梱可能な受注番号配列の配列(groups)を返す
+          get_key = "groups"
         when "checkconnect"
           fields = nil
           get_key = nil

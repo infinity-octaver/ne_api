@@ -266,6 +266,9 @@ This allows easy injection of `FakeMaster` in tests.
 5. Create a new Pull Request
 
 ## Update
+### ver0.0.23
+  * 同梱系APIに対応（受注伝票一括同梱 `receiveorder_base_bundle` / 同梱候補グループ取得 `receiveorder_base_bundle_candidate_groups` / 受注分類タグ検索 `receiveorder_groupingtag_search`）。詳細は [`BUNDLING_API.md`](BUNDLING_API.md) 参照
+  * `method_missing` を複数語メソッド対応に改修（登録モデル名の最長前方一致で解決。単一語メソッドは従来通りで後方互換）
 ### ver0.0.22
   * bug fix
 ### ver0.0.21
