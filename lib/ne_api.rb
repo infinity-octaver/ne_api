@@ -9,12 +9,19 @@ require 'dotenv'
 module NeAPI
   API_SERVER_HOST = "https://api.next-engine.org"
   NE_SERVER_HOST = "https://base.next-engine.org"
+  # メイン機能が混み合っているときのエラーコード。間隔を空けて再試行する
+  RETRYABLE_CODES = ["003001","003002","008003","009005","011007"].freeze
+
+  class << self
+    # Faraday のコネクションを差し替える(テストやスタブ用)。nil のときは API_SERVER_HOST へ接続する
+    attr_accessor :connection
+  end
 
   private
 
   
   def conn
-    @conn ||=  Faraday.new(:url => API_SERVER_HOST) do |faraday|
+    @conn ||= NeAPI.connection || Faraday.new(:url => API_SERVER_HOST) do |faraday|
       faraday.request  :url_encoded             # form-encode POST params
       faraday.response :logger                  # log requests to STDOUT
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
@@ -25,10 +32,10 @@ module NeAPI
   def response response
     body = JSON.parse response.body
     if body["result"] != "success"
-      if ["003001","003002","008003","009005","011007"].include?(body["code"])
+      if RETRYABLE_CODES.include?(body["code"])
         return false
       else
-        raise NeAPIException,  sprintf("%s:%s", body["code"], body["message"])
+        raise NeAPIException.new(sprintf("%s:%s", body["code"], body["message"]), code: body["code"], response: body)
       end
       return false
     end
@@ -38,6 +45,9 @@ module NeAPI
   class Master
     include NeAPI
     attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval, :access_token_end_date, :refresh_token_end_date
+    # レスポンスにトークンが含まれていたとき(エラー応答を含む)に呼ばれるフック。
+    # ->(master, response_body) { ... } を設定すると、次の呼び出しの前にトークンを永続化できる
+    attr_accessor :on_token_refresh
     PATH_PREFIX="/api_v1_"
 
     def initialize access_token: "", refresh_token: ""
@@ -73,24 +83,40 @@ module NeAPI
         post_args = {access_token: @access_token, refresh_token: @refresh_token}.merge(params)
       end
       res = false
-      
+
       self.retry_num.times do
-        res =response(conn.post PATH_PREFIX+model.to_s+ "/" + method, post_args)
-        break if res != false
+        body = JSON.parse((conn.post PATH_PREFIX+model.to_s+ "/" + method, post_args).body)
+        # エラー応答でもトークンが更新されることがある。取りこぼすと次の呼び出しが 002002 になるので必ず取り込む
+        store_tokens(body)
+        if body["result"] == "success"
+          res = body
+          break
+        end
+        unless RETRYABLE_CODES.include?(body["code"])
+          raise NeAPIException.new(sprintf("%s:%s", body["code"], body["message"]), code: body["code"], response: body)
+        end
+        # 再試行は更新後のトークンで行う
+        post_args[:access_token] = @access_token
+        post_args[:refresh_token] = @refresh_token
         sleep(self.wait_interval)
       end
       if res == false
-        raise NeAPIException,  "003001:Next Engineが大変混み合っています。APIの接続を#{self.retry_num}回、#{self.wait_interval}秒間隔でアクセスを試みましたが、失敗をしました"
-        return false
+        raise NeAPIException.new("003001:Next Engineが大変混み合っています。APIの接続を#{self.retry_num}回、#{self.wait_interval}秒間隔でアクセスを試みましたが、失敗をしました", code: "003001")
       end
-      
-      @access_token = res["access_token"] if res["access_token"].present?
-      @refresh_token = res["refresh_token"] if res["refresh_token"].present?
-      @access_token_end_date  = res["access_token_end_date"] if res["access_token_end_date"].present?
-      @refresh_token_end_date  = res["refresh_token_end_date"] if res["refresh_token_end_date"].present?
 
       get_key.present? ? res[get_key]  : res
     end
+    # レスポンスに含まれるトークンと有効期限を取り込み、on_token_refresh フックを呼ぶ
+    def store_tokens(body)
+      return unless body.is_a?(Hash) && body["access_token"].present?
+
+      @access_token = body["access_token"]
+      @refresh_token = body["refresh_token"] if body["refresh_token"].present?
+      @access_token_end_date = body["access_token_end_date"] if body["access_token_end_date"].present?
+      @refresh_token_end_date = body["refresh_token_end_date"] if body["refresh_token_end_date"].present?
+      on_token_refresh.call(self, body) if on_token_refresh
+    end
+
     def method_missing(path, args={})
       super if @@params.nil? || path.nil?
 
@@ -179,5 +205,12 @@ module NeAPI
   end
 end
 class NeAPIException  < StandardError
-end
+  # code: NEのエラーコード(例 "002004")、response: エラー応答のボディ(Hash)。メッセージは従来どおり "コード:メッセージ"
+  attr_reader :code, :response
 
+  def initialize(message = nil, code: nil, response: nil)
+    @code = code || message.to_s[/\A(\d{6}):/, 1]
+    @response = response
+    super(message)
+  end
+end
