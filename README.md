@@ -300,3 +300,23 @@ This allows easy injection of `FakeMaster` in tests.
 ### ver0.0.6
   * Ruby2.2対応
   * リトライ回数のデフォルト値変更
+
+## トークンの永続化 (0.0.24〜)
+
+レスポンスにトークンが含まれていたとき（エラー応答・混雑時の再試行の途中を含む）に呼ばれるフックを設定できます。
+次の呼び出しの前にトークンを保存しておくことで、古いトークンによる `002002` を防げます。
+
+```ruby
+master = NeAPI::Master.new(access_token: user.access_token, refresh_token: user.refresh_token)
+master.on_token_refresh = ->(m, _body) { user.update!(access_token: m.access_token, refresh_token: m.refresh_token) }
+```
+
+`NeAPIException` からはエラーコードとエラー応答を取得できます（メッセージは従来どおり `"コード:メッセージ"`）。
+
+```ruby
+rescue NeAPIException => e
+  e.code      #=> "020006"
+  e.response  #=> { "result" => "error", "code" => "020006", "message" => "..." }
+```
+
+テストなどで HTTP 接続を差し替えるには `NeAPI.connection = Faraday.new { ... }` を設定します（`nil` で元に戻ります）。

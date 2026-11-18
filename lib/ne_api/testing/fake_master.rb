@@ -13,7 +13,7 @@ module NeAPI
     #
     class FakeMaster
       attr_accessor :access_token, :refresh_token, :wait_flag, :retry_num, :wait_interval
-      attr_accessor :access_token_end_date, :refresh_token_end_date
+      attr_accessor :access_token_end_date, :refresh_token_end_date, :on_token_refresh
       attr_reader :call_history
 
       def initialize(access_token: "test_access_token", refresh_token: "test_refresh_token")
@@ -106,7 +106,7 @@ module NeAPI
         @call_history << { method: method_name.to_sym, args: args, time: Time.now }
 
         if @error_mode
-          raise NeAPIException, "#{@error_code}:#{@error_message}"
+          raise NeAPIException.new("#{@error_code}:#{@error_message}", code: @error_code)
         end
 
         if @stubbed_responses.key?(method_name.to_sym)
